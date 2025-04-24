@@ -5,38 +5,49 @@ import React, { useEffect } from "react";
 export const Home = () => {
   const { store, dispatch } = useGlobalReducer();
 
-  const getData = () => {
-    fetch("https://playground.4geeks.com/contact/agendas/drew/contacts")
-      .then((resp) => {
-        console.log("Response: ", resp);
-        if (resp.ok == false) {
-          createAgenda();
-        }
-        return resp.json();
-      })
-      .then((data) => console.log("Get Data: ", data));
+  const getData = async () => {
+    try {
+      const resp = await fetch(
+        "https://playground.4geeks.com/contact/agendas/drew/contacts"
+      );
+      console.log("Response: ", resp);
+      if (!resp.ok) {
+        await createAgenda();
+      }
+      const data = await resp.json();
+      console.log("Get Data: ", data);
+      // Dispatch data to global state
+      dispatch({ type: "SET_CONTACTS", payload: data });
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
   };
 
-  const createAgenda = () => {
-    const opt = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        slug: "username",
-        id: 0,
-      }),
-    };
-
-    fetch("https://playground.4geeks.com/contact/agendas/username", opt)
-      .then((resp) => {
-        return resp.json();
-      })
-      .then((data) => {
-        console.log("Agenda created! Data: ", data);
+  const createAgenda = async (slug = "username") => {
+    try {
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          slug: slug,
+          id: 0,
+        }),
+      };
+      const resp = await fetch(
+        `https://playground.4geeks.com/contact/agendas/${slug}`,
+        options
+      );
+      if (resp.ok) {
+        console.log("Agenda created successfully");
         getData();
-      });
+      } else {
+        console.error("Agenda creation failed");
+      }
+    } catch (error) {
+      console.error("Agenda creation error: ", error);
+    }
   };
 
   useEffect(() => {
