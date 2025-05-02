@@ -14,6 +14,22 @@ const ErrorPage = () => (
     <p>The page you're looking for doesn't exist.</p>
   </div>
 );
+const getData = async () => {
+  const data = await handleFetch(
+    "https://playground.4geeks.com/contact/agendas/username/contacts"
+  );
+
+  if (data) {
+    dispatch({
+      type: "set-contact-list",
+      payload: Array.isArray(data) ? data : [],
+    });
+  }
+};
+
+useEffect(() => {
+  getData();
+}, []);
 
 export const router = createBrowserRouter(
   createRoutesFromElements(

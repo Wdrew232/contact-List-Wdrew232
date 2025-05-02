@@ -67,23 +67,6 @@ export const ContactSubmit = () => {
     }
   };
 
-  const getData = async () => {
-    const data = await handleFetch(
-      "https://playground.4geeks.com/contact/agendas/username/contacts"
-    );
-
-    if (data) {
-      dispatch({
-        type: "set-contact-list",
-        payload: Array.isArray(data) ? data : [],
-      });
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
-
   return (
     <div className="text-center mt-5">
       <h2>Contact List</h2>
