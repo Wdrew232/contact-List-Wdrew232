@@ -1,35 +1,39 @@
-export const initialStore = () => {
-  return {
-    contactList: [],
-    singleContact: {},
-    todos: [], // Initialize todos for add_task logic
-  };
+export const initialStore = {
+  contactList: [],
+  singleContact: {},
+  todos: [], // Initialize todos for add_task logic
 };
 
-export default function storeReducer(store, action = {}) {
+export default function storeReducer(store = initialStore, action = {}) {
   switch (action.type) {
     case "set-contact-list":
       return {
         ...store,
-        contactList: action.payload,
+        contactList: Array.isArray(action.payload) ? action.payload : [],
       };
 
+    case "SET_CONTACTS":
+      return {
+        ...store,
+        contactList: Array.isArray(action.payload) ? action.payload : [],
+      };
+  
     case "set-single-contact":
       return {
         ...store,
-        singleContact: action.payload,
+        singleContact: action.payload || {},
       };
 
     case "add_task":
-      if (!action.payload || !action.payload.id || !action.payload.color) {
-        console.error("Invalid payload for add_task");
+      if (!action.payload || typeof action.payload.id === "undefined" || !action.payload.color) {
+        console.error("Invalid payload for add_task:", action.payload);
         return store;
       }
-      const { id, color } = action.payload;
+
       return {
         ...store,
-        todos: (store.todos || []).map((todo) =>
-          todo.id === id ? { ...todo, background: color } : todo
+        todos: store.todos.map((todo) =>
+          todo.id === action.payload.id ? { ...todo, background: action.payload.color } : todo
         ),
       };
 

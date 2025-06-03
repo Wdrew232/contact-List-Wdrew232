@@ -36,7 +36,7 @@ export const Home = () => {
         }),
       };
       const resp = await fetch(
-        `https://playground.4geeks.com/contact/agendas/${slug}`,
+        `https://playground.4geeks.com/contact/agendas/drew/contacts`,
         options
       );
       if (resp.ok) {
