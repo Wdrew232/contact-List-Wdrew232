@@ -11,15 +11,13 @@ export const ContactSubmit = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch all contacts
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await fetch("https://playground.4geeks.com/contact/agendas/drew/contacts");
+      const response = await fetch("https://playground.4geeks.com/contact/agendas/drew");
       if (!response.ok) throw new Error("Failed to retrieve contacts");
       const data = await response.json();
-
-      dispatch({ type: "set-contact-list", payload: data });
+      dispatch({ type: "SET_CONTACTS", payload: data });
       localStorage.setItem("contacts", JSON.stringify(data));
     } catch (err) {
       setError("Error fetching contacts.");
@@ -32,7 +30,7 @@ export const ContactSubmit = () => {
   useEffect(() => {
     const savedContacts = JSON.parse(localStorage.getItem("contacts"));
     if (savedContacts && savedContacts.length) {
-      dispatch({ type: "set-contact-list", payload: savedContacts });
+      dispatch({ type: "SET_CONTACTS", payload: savedContacts });
     } else {
       fetchContacts();
     }
@@ -47,7 +45,6 @@ export const ContactSubmit = () => {
     return true;
   };
 
-  // Create a new contact
   const createContact = async () => {
     if (!validateForm()) return;
 
@@ -62,9 +59,9 @@ export const ContactSubmit = () => {
 
       if (response.ok) {
         const newContact = await response.json();
-        dispatch({ type: "set-contact-list", payload: [...store.contactList, newContact] });
-        localStorage.setItem("contacts", JSON.stringify([...store.contactList, newContact]));
-
+        const updatedList = [...store.contactList, newContact];
+        dispatch({ type: "SET_CONTACTS", payload: updatedList });
+        localStorage.setItem("contacts", JSON.stringify(updatedList));
         setName("");
         setPhone("");
         setEmail("");
@@ -80,44 +77,16 @@ export const ContactSubmit = () => {
     }
   };
 
-  // Update a contact
-  const updateContact = async (contactId, updatedData) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`https://playground.4geeks.com/contact/agendas/drew/contacts/${contactId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
-
-      if (response.ok) {
-        const updatedContact = await response.json();
-        const updatedContacts = store.contactList.map((contact) =>
-          contact.id === contactId ? updatedContact : contact
-        );
-
-        dispatch({ type: "set-contact-list", payload: updatedContacts });
-        localStorage.setItem("contacts", JSON.stringify(updatedContacts));
-      } else {
-        setError("Failed to update contact.");
-      }
-    } catch (err) {
-      setError("Error updating contact.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete a contact
   const deleteContact = async (contactId) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://playground.4geeks.com/contact/agendas/drew/contacts/${contactId}`, { method: "DELETE" });
+      const response = await fetch(`https://playground.4geeks.com/contact/agendas/drew/contacts/${contactId}`, {
+        method: "DELETE"
+      });
 
       if (response.ok) {
-        const updatedContacts = store.contactList.filter((contact) => contact.id !== contactId);
-        dispatch({ type: "set-contact-list", payload: updatedContacts });
+        const updatedContacts = store.contactList.filter((c) => c.id !== contactId);
+        dispatch({ type: "SET_CONTACTS", payload: updatedContacts });
         localStorage.setItem("contacts", JSON.stringify(updatedContacts));
       } else {
         setError("Failed to delete contact.");
@@ -133,6 +102,7 @@ export const ContactSubmit = () => {
   return (
     <div className="text-center mt-5">
       <h2>Contact List</h2>
+
       {loading && <div className="spinner-border text-primary" role="status"><span className="sr-only">Loading...</span></div>}
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -142,9 +112,9 @@ export const ContactSubmit = () => {
             <li key={contact.id}>
               <Link to={`/contact/${contact.id}`}>{contact.name}</Link>{" "}
               <Link to={`/update-contact/${contact.id}`}>
-                <button>Update</button>
+                <button className="btn btn-sm btn-warning mx-1">Update</button>
               </Link>{" "}
-              <button onClick={() => deleteContact(contact.id)}>Delete</button>
+              <button className="btn btn-sm btn-danger" onClick={() => deleteContact(contact.id)}>Delete</button>
             </li>
           ))
         ) : (
@@ -152,12 +122,12 @@ export const ContactSubmit = () => {
         )}
       </ul>
 
-      <h2>Add a Contact</h2>
-      <input onChange={(e) => setName(e.target.value)} type="text" placeholder="Name" value={name} />
-      <input onChange={(e) => setPhone(e.target.value)} type="text" placeholder="Phone" value={phone} />
-      <input onChange={(e) => setEmail(e.target.value)} type="text" placeholder="Email" value={email} />
-      <input onChange={(e) => setAddress(e.target.value)} type="text" placeholder="Address" value={address} />
-      <button onClick={createContact} disabled={loading}>Submit</button>
+      <h2 className="mt-4">Add a Contact</h2>
+      <input className="form-control my-2" onChange={(e) => setName(e.target.value)} type="text" placeholder="Name" value={name} />
+      <input className="form-control my-2" onChange={(e) => setPhone(e.target.value)} type="text" placeholder="Phone" value={phone} />
+      <input className="form-control my-2" onChange={(e) => setEmail(e.target.value)} type="text" placeholder="Email" value={email} />
+      <input className="form-control my-2" onChange={(e) => setAddress(e.target.value)} type="text" placeholder="Address" value={address} />
+      <button className="btn btn-success mt-2" onClick={createContact} disabled={loading}>Submit</button>
     </div>
   );
 };
